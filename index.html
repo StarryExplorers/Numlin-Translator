@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Numlin Translator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f0f8ff;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #3c3c3c;
+    }
+    textarea {
+      width: 80%;
+      height: 100px;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
+    }
+    select, button {
+      font-size: 16px;
+      padding: 10px;
+      margin: 10px;
+      cursor: pointer;
+    }
+    #output {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      padding: 10px;
+      min-height: 60px;
+      font-size: 16px;
+      white-space: pre-wrap;
+      width: 80%;
+      margin: 10px auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔡 Numlin Translator 🔢</h1>
+
+  <textarea id="inputText" placeholder="Type English or Numlin here..."></textarea><br>
+
+  <select id="mode">
+    <option value="toNumlin">English ➡️ Numlin</option>
+    <option value="toEnglish">Numlin ➡️ English</option>
+  </select>
+
+  <button onclick="translate()">Translate</button>
+  <button onclick="copyOutput()">Copy</button>
+
+  <div id="output" placeholder="Translation will appear here..."></div>
+
+  <script>
+    function translate() {
+      const input = document.getElementById('inputText').value.trim();
+      const mode = document.getElementById('mode').value;
+      const outputDiv = document.getElementById('output');
+
+      if (mode === 'toNumlin') {
+        outputDiv.innerText = toNumlin(input);
+      } else {
+        outputDiv.innerText = toEnglish(input);
+      }
+    }
+
+    function toNumlin(text) {
+      return text.split('').map(char => {
+        const code = char.toUpperCase().charCodeAt(0);
+        if (code >= 65 && code <= 90) {
+          return (code - 64); // A = 1, B = 2, ...
+        } else if (char === ' ') {
+          return ' ';
+        } else {
+          return char; // keep punctuation as-is
+        }
+      }).join(',');
+    }
+
+    function toEnglish(numlin) {
+      const chunks = numlin.split(',');
+      return chunks.map(part => {
+        const trimmed = part.trim();
+        if (trimmed === '') return '';
+        if (trimmed === ' ') return ' ';
+        const num = parseInt(trimmed);
+        if (!isNaN(num) && num >= 1 && num <= 26) {
+          return String.fromCharCode(num + 64);
+        } else {
+          return trimmed; // keep punctuation or other chars
+        }
+      }).join('');
+    }
+
+    function copyOutput() {
+      const outputText = document.getElementById('output').innerText;
+      navigator.clipboard.writeText(outputText).then(() => {
+        alert("Copied to clipboard! 📋");
+      }).catch(() => {
+        alert("Failed to copy 😢");
+      });
+    }
+  </script>
+</body>
+</html>
