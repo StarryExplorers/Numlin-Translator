@@ -11,37 +11,30 @@
       padding: 20px;
     }
     h1 {
-      color: #3c3c3c;
+      color: #333;
     }
     textarea {
       width: 80%;
       height: 100px;
-      margin: 10px 0;
-      padding: 10px;
       font-size: 16px;
+      padding: 10px;
+      margin: 10px 0;
     }
     select, button {
       font-size: 16px;
       padding: 10px;
-      margin: 10px;
+      margin: 10px 5px;
       cursor: pointer;
     }
-    #output {
-      background-color: #fff;
-      border: 1px solid #ccc;
-      padding: 10px;
-      min-height: 60px;
-      font-size: 16px;
-      white-space: pre-wrap;
-      width: 80%;
-      margin: 10px auto;
+    #outputText {
+      height: 80px;
     }
   </style>
 </head>
 <body>
   <h1>🔡 Numlin Translator 🔢</h1>
 
-  <textarea id="inputText" placeholder="Type English or Numlin here..."></textarea><br>
+  <textarea id="inputText" placeholder="Type in English or Numlin..."></textarea><br>
 
   <select id="mode">
     <option value="toNumlin">English ➡️ Numlin</option>
@@ -51,18 +44,19 @@
   <button onclick="translate()">Translate</button>
   <button onclick="copyOutput()">Copy</button>
 
-  <div id="output" placeholder="Translation will appear here..."></div>
+  <br>
+  <textarea id="outputText" readonly placeholder="Translation will appear here..."></textarea>
 
   <script>
     function translate() {
       const input = document.getElementById('inputText').value.trim();
       const mode = document.getElementById('mode').value;
-      const outputDiv = document.getElementById('output');
+      const output = document.getElementById('outputText');
 
       if (mode === 'toNumlin') {
-        outputDiv.innerText = toNumlin(input);
+        output.value = toNumlin(input);
       } else {
-        outputDiv.innerText = toEnglish(input);
+        output.value = toEnglish(input);
       }
     }
 
@@ -70,18 +64,18 @@
       return text.split('').map(char => {
         const code = char.toUpperCase().charCodeAt(0);
         if (code >= 65 && code <= 90) {
-          return (code - 64); // A = 1, B = 2, ...
+          return code - 64; // A=1, B=2, ...
         } else if (char === ' ') {
-          return ' ';
+          return ' '; // real space
         } else {
-          return char; // keep punctuation as-is
+          return char; // punctuation stays the same
         }
       }).join(',');
     }
 
-    function toEnglish(numlin) {
-      const chunks = numlin.split(',');
-      return chunks.map(part => {
+    function toEnglish(numlinText) {
+      const parts = numlinText.split(',');
+      return parts.map(part => {
         const trimmed = part.trim();
         if (trimmed === '') return '';
         if (trimmed === ' ') return ' ';
@@ -89,18 +83,17 @@
         if (!isNaN(num) && num >= 1 && num <= 26) {
           return String.fromCharCode(num + 64);
         } else {
-          return trimmed; // keep punctuation or other chars
+          return trimmed; // punctuation or anything else
         }
       }).join('');
     }
 
     function copyOutput() {
-      const outputText = document.getElementById('output').innerText;
-      navigator.clipboard.writeText(outputText).then(() => {
-        alert("Copied to clipboard! 📋");
-      }).catch(() => {
-        alert("Failed to copy 😢");
-      });
+      const outputText = document.getElementById('outputText');
+      outputText.select();
+      outputText.setSelectionRange(0, 99999); // for mobile
+      document.execCommand('copy');
+      alert("Copied to clipboard! 📋");
     }
   </script>
 </body>
