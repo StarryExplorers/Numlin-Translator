@@ -1,24 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Numlin Translator</title>
   <style>
     body {
-      font-family: sans-serif;
-      background-color: #f0f8ff;
+      background: #e8f4ff;
+      font-family: 'Segoe UI', sans-serif;
       text-align: center;
       padding: 20px;
     }
     h1 {
-      color: #333;
+      color: #222;
     }
     textarea {
       width: 80%;
       height: 100px;
       font-size: 16px;
-      padding: 10px;
       margin: 10px 0;
+      padding: 10px;
+      resize: none;
     }
     select, button {
       font-size: 16px;
@@ -26,15 +27,15 @@
       margin: 10px 5px;
       cursor: pointer;
     }
-    #outputText {
+    #output {
       height: 80px;
     }
   </style>
 </head>
 <body>
-  <h1>🔡 Numlin Translator 🔢</h1>
+  <h1>🔤 Numlin Translator 🔢</h1>
 
-  <textarea id="inputText" placeholder="Type in English or Numlin..."></textarea><br>
+  <textarea id="inputText" placeholder="Enter English or Numlin..."></textarea><br>
 
   <select id="mode">
     <option value="toNumlin">English ➡️ Numlin</option>
@@ -42,16 +43,55 @@
   </select>
 
   <button onclick="translate()">Translate</button>
-  <button onclick="copyOutput()">Copy</button>
+  <button onclick="copyOutput()">Copy</button><br>
 
-  <br>
-  <textarea id="outputText" readonly placeholder="Translation will appear here..."></textarea>
+  <textarea id="output" readonly placeholder="Your translation appears here..."></textarea>
 
   <script>
+    // Translate to Numlin
+    function toNumlin(text) {
+      let result = [];
+      for (let char of text) {
+        if (char.match(/[a-z]/i)) {
+          let num = char.toUpperCase().charCodeAt(0) - 64;
+          result.push(num);
+        } else if (char === ' ') {
+          result.push(' ');
+        } else {
+          result.push(char);
+        }
+      }
+      return result.join(',');
+    }
+
+    // Translate to English
+    function toEnglish(numlin) {
+      let parts = numlin.split(',');
+      let result = '';
+      for (let part of parts) {
+        let trimmed = part.trim();
+        if (trimmed === '') {
+          continue;
+        } else if (trimmed === ' ') {
+          result += ' ';
+        } else if (!isNaN(trimmed)) {
+          let num = parseInt(trimmed);
+          if (num >= 1 && num <= 26) {
+            result += String.fromCharCode(num + 64);
+          } else {
+            result += trimmed;
+          }
+        } else {
+          result += trimmed;
+        }
+      }
+      return result;
+    }
+
     function translate() {
-      const input = document.getElementById('inputText').value.trim();
+      const input = document.getElementById('inputText').value;
       const mode = document.getElementById('mode').value;
-      const output = document.getElementById('outputText');
+      const output = document.getElementById('output');
 
       if (mode === 'toNumlin') {
         output.value = toNumlin(input);
@@ -60,40 +100,12 @@
       }
     }
 
-    function toNumlin(text) {
-      return text.split('').map(char => {
-        const code = char.toUpperCase().charCodeAt(0);
-        if (code >= 65 && code <= 90) {
-          return code - 64; // A=1, B=2, ...
-        } else if (char === ' ') {
-          return ' '; // real space
-        } else {
-          return char; // punctuation stays the same
-        }
-      }).join(',');
-    }
-
-    function toEnglish(numlinText) {
-      const parts = numlinText.split(',');
-      return parts.map(part => {
-        const trimmed = part.trim();
-        if (trimmed === '') return '';
-        if (trimmed === ' ') return ' ';
-        const num = parseInt(trimmed);
-        if (!isNaN(num) && num >= 1 && num <= 26) {
-          return String.fromCharCode(num + 64);
-        } else {
-          return trimmed; // punctuation or anything else
-        }
-      }).join('');
-    }
-
     function copyOutput() {
-      const outputText = document.getElementById('outputText');
+      const outputText = document.getElementById('output');
       outputText.select();
-      outputText.setSelectionRange(0, 99999); // for mobile
+      outputText.setSelectionRange(0, 99999);
       document.execCommand('copy');
-      alert("Copied to clipboard! 📋");
+      alert('Copied to clipboard! 📋');
     }
   </script>
 </body>
