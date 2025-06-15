@@ -5,71 +5,83 @@
   <title>Numlin Translator</title>
   <style>
     body {
-      background: #e8f4ff;
+      background: #f5faff;
       font-family: 'Segoe UI', sans-serif;
-      text-align: center;
       padding: 20px;
+      text-align: center;
     }
     h1 {
-      color: #222;
+      color: #333;
+      margin-bottom: 20px;
     }
     textarea {
       width: 80%;
       height: 100px;
       font-size: 16px;
-      margin: 10px 0;
       padding: 10px;
-      resize: none;
+      margin-bottom: 10px;
+      resize: vertical;
     }
     select, button {
       font-size: 16px;
-      padding: 10px;
+      padding: 10px 15px;
       margin: 10px 5px;
       cursor: pointer;
-    }
-    #output {
-      height: 80px;
     }
   </style>
 </head>
 <body>
   <h1>🔤 Numlin Translator 🔢</h1>
 
-  <textarea id="inputText" placeholder="Enter English or Numlin..."></textarea><br>
+  <textarea id="inputText" placeholder="Type English or Numlin here..."></textarea><br>
 
   <select id="mode">
     <option value="toNumlin">English ➡️ Numlin</option>
     <option value="toEnglish">Numlin ➡️ English</option>
   </select>
 
-  <button onclick="translate()">Translate</button>
-  <button onclick="copyOutput()">Copy</button><br>
+  <button onclick="translateText()">Translate</button>
+  <button onclick="copyOutput()">Copy</button>
 
-  <textarea id="output" readonly placeholder="Your translation appears here..."></textarea>
+  <br>
+  <textarea id="outputText" readonly placeholder="Your translation will appear here..."></textarea>
 
   <script>
-    // Translate to Numlin
-    function toNumlin(text) {
+    function translateText() {
+      const input = document.getElementById("inputText").value.trim();
+      const mode = document.getElementById("mode").value;
+      const output = document.getElementById("outputText");
+
+      if (mode === "toNumlin") {
+        output.value = convertToNumlin(input);
+      } else {
+        output.value = convertToEnglish(input);
+      }
+    }
+
+    function convertToNumlin(text) {
       let result = [];
+
       for (let char of text) {
-        if (char.match(/[a-z]/i)) {
-          let num = char.toUpperCase().charCodeAt(0) - 64;
-          result.push(num);
+        if (char.match(/[a-zA-Z]/)) {
+          result.push(char.toUpperCase().charCodeAt(0) - 64); // A=1
         } else if (char === ' ') {
-          result.push(' ');
+          result.push(' '); // preserve real space
         } else {
-          result.push(char);
+          result.push(char); // keep punctuation like ! . ? etc
         }
       }
+
       return result.join(',');
     }
 
-    // Translate to English
-    function toEnglish(numlin) {
-      let parts = numlin.split(',');
+    function convertToEnglish(numlinText) {
       let result = '';
-      for (let part of parts) {
-        let trimmed = part.trim();
+      let tokens = numlinText.split(',');
+
+      for (let token of tokens) {
+        let trimmed = token.trim();
+
         if (trimmed === '') {
           continue;
         } else if (trimmed === ' ') {
@@ -85,27 +97,16 @@
           result += trimmed;
         }
       }
+
       return result;
     }
 
-    function translate() {
-      const input = document.getElementById('inputText').value;
-      const mode = document.getElementById('mode').value;
-      const output = document.getElementById('output');
-
-      if (mode === 'toNumlin') {
-        output.value = toNumlin(input);
-      } else {
-        output.value = toEnglish(input);
-      }
-    }
-
     function copyOutput() {
-      const outputText = document.getElementById('output');
-      outputText.select();
-      outputText.setSelectionRange(0, 99999);
-      document.execCommand('copy');
-      alert('Copied to clipboard! 📋');
+      const output = document.getElementById("outputText");
+      output.select();
+      output.setSelectionRange(0, 99999); // mobile support
+      document.execCommand("copy");
+      alert("Copied to clipboard! 📋");
     }
   </script>
 </body>
